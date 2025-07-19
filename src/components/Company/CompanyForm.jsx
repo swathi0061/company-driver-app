@@ -1,44 +1,68 @@
 import React, { useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-
-const CompanyForm = ({ fetchData }) => {
-  const [form, setForm] = useState({
-    name: '', establishedOn: '', regNumber: '', website: '',
-    address1: '', address2: '', city: '', state: '', zip: '',
-    contactFirstName: '', contactLastName: '', contactEmail: '', contactMobile: ''
+const CompanyForm = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    establishedOn: '',
+    registrationNumber: '',
+    website: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    contactFirstName: '',
+    contactLastName: '',
+    contactMail: '',
+    contactMobile: '',
   });
 
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    await saveCompany(form);
-    fetchData();
-    setForm({
-      name: '', establishedOn: '', regNumber: '', website: '',
-      address1: '', address2: '', city: '', state: '', zip: '',
-      contactFirstName: '', contactLastName: '', contactEmail: '', contactMobile: ''
+
+    // Mock inserting logic for now
+    toast.success('Company details inserted successfully!');
+    setFormData({
+    name: '',
+    establishedOn: '',
+    registrationNumber: '',
+    website: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    contactFirstName: '',
+    contactLastName: '',
+    contactMail: '',
+    contactMobile: '',
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="form">
-      <input name="name" placeholder="Company Name" value={form.name} onChange={handleChange} />
-      <input name="establishedOn" type="date" value={form.establishedOn} onChange={handleChange} />
-      <input name="regNumber" placeholder="Registration #" value={form.regNumber} onChange={handleChange} />
-      <input name="website" placeholder="Website" value={form.website} onChange={handleChange} />
-      <input name="address1" placeholder="Address 1" value={form.address1} onChange={handleChange} />
-      <input name="address2" placeholder="Address 2" value={form.address2} onChange={handleChange} />
-      <input name="city" placeholder="City" value={form.city} onChange={handleChange} />
-      <input name="state" placeholder="State" value={form.state} onChange={handleChange} />
-      <input name="zip" placeholder="Zip Code" value={form.zip} onChange={handleChange} />
-      <input name="contactFirstName" placeholder="Contact First Name" value={form.contactFirstName} onChange={handleChange} />
-      <input name="contactLastName" placeholder="Contact Last Name" value={form.contactLastName} onChange={handleChange} />
-      <input name="contactEmail" placeholder="Contact Email" value={form.contactEmail} onChange={handleChange} />
-      <input name="contactMobile" placeholder="Contact Mobile" value={form.contactMobile} onChange={handleChange} />
-      <button type="submit">Save</button>
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input name="name" value={formData.name} onChange={handleChange} placeholder="Company Name" className="input" />
+      <input type="date" name="establishedOn" value={formData.establishedOn} onChange={handleChange} placeholder="Company Established On" className="input" />
+      <input name="registrationNumber" value={formData.registrationNumber} onChange={handleChange} placeholder="Company Registration Number" className="input" />
+      <input name="website" value={formData.website} onChange={handleChange} placeholder="Company Website" className="input" />
+      <input name="address1" value={formData.address1} onChange={handleChange} placeholder="Company Address1" className="input" />
+      <input name="address2" value={formData.address2} onChange={handleChange} placeholder="Company Address2" className="input" />
+      <input name="city" value={formData.city} onChange={handleChange} placeholder="City" className="input" />
+      <input name="state" value={formData.state} onChange={handleChange} placeholder="Company State" className="input" />
+      <input name="zipCode" value={formData.zipCode} onChange={handleChange} placeholder="Zip Code" className="input" />
+      <input name="contactFirstName" value={formData.contactFirstName} onChange={handleChange} placeholder="Primary Contact First Name" className="input" />
+      <input name="contactLastName" value={formData.contactLastName} onChange={handleChange} placeholder="Primary Contact Last Name" className="input" />
+      <input name="contactMail" value={formData.contactMail} onChange={handleChange} placeholder="Primary Contact Mail" className="input" />
+      <input name="contactMobile" value={formData.contactMobile} onChange={handleChange} placeholder="Primary Contact Mobile" className="input" />
+      <button type="submit" className="col-span-1 md:col-span-2 bg-teal-600 text-white py-2 px-4 rounded hover:bg-teal-700 transition">Save</button>
+
+      <ToastContainer position="top-right" autoClose={2000} />
     </form>
   );
 };
