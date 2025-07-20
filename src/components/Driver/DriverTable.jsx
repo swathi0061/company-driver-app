@@ -1,34 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Edit, Trash2 } from 'lucide-react';
+import { getDriver, updateDriver, deleteDriver } from '../../service/apiService';
 
-const mockDriverData = [
-  {
-    id: 1,
-    name: 'Ravi Kumar',
-    licenseNumber: 'DL1234567',
-    contactNumber: '9876543210',
-    joiningDate: '2022-03-01',
-    city: 'Chennai',
-    state: 'Tamil Nadu',
-    zipCode: '600001',
-    address: 'Street 1, Area A',
-  },
-  {
-    id: 2,
-    name: 'Suresh Babu',
-    licenseNumber: 'MH7654321',
-    contactNumber: '9012345678',
-    joiningDate: '2021-11-20',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    zipCode: '400001',
-    address: 'Road 3, Block B',
-  },
-  // add more drivers if needed
-];
 
-const ITEMS_PER_PAGE = 5;
+
+const fieldPlaceholders = {
+  
+    driverFirstName: 'Driver First Name',
+    driverLastName: 'Driver Last Name',
+    driverEmail:'Driver Mail',
+    driverContactNumber: 'Driver Mobile',
+    dob:'DOB',
+    licenseNumber: 'License No',
+    experience:'Exp',
+    address1: 'Address Line 1',
+    address2: 'Address Line 2',
+    city: 'City',
+    state: 'State',
+    zipCode: 'Zipcode',
+};
+
+const ITEMS_PER_PAGE = 2;
 
 const DriverTable = () => {
   const [drivers, setDrivers] = useState([]);
@@ -36,9 +30,19 @@ const DriverTable = () => {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    setDrivers(mockDriverData); // replace with API later
-  }, []);
+ useEffect(() => {
+  fetchDrivers();
+}, []);
+
+const fetchDrivers = async () => {
+  try {
+    const res = await getDriver(); 
+    setDrivers(res.data.content || []); 
+  } catch (err) {
+    toast.error('Failed to load drivers');
+  }
+};
+
 
   const handleEdit = (driver) => {
     setSelectedDriver(driver);
@@ -48,18 +52,31 @@ const DriverTable = () => {
     setSelectedDriver({ ...selectedDriver, [e.target.name]: e.target.value });
   };
 
-  const handleUpdate = () => {
-    const updated = drivers.map((d) =>
-      d.id === selectedDriver.id ? selectedDriver : d
-    );
-    setDrivers(updated);
-    toast.success('Driver details updated successfully!');
+ const handleUpdate = async () => {
+  try {
+    await updateDriver(selectedDriver); // call backend
+    toast.success('Driver updated!');
+    fetchDrivers(); // reload from backend
     setSelectedDriver(null);
-  };
+  } catch (err) {
+    toast.error('Failed to update driver');
+  }
+};
+
+const handleDelete = async (id) => {
+  try {
+    await deleteDriver(id); // call backend
+    toast.success('Driver deleted!');
+    fetchDrivers(); // reload after deletion
+  } catch (err) {
+    toast.error('Failed to delete driver');
+  }
+};
+
 
   const filtered = drivers.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase())
-  );
+  `${d.driverFirstName} ${d.driverLastName}`.toLowerCase().includes(search.toLowerCase())
+);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -84,27 +101,39 @@ const DriverTable = () => {
         <table className="w-full border border-collapse border-gray-300">
           <thead className="bg-teal-700 text-white">
             <tr>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">License</th>
-              <th className="p-2 border">Contact</th>
+              <th className="p-2 border text-nowrap">Driver First Name</th>
+              <th className="p-2 border text-nowrap">Driver Last Name</th>
+              <th className="p-2 border">Email</th>
+              <th className="p-2 border">Mobile</th>
+              <th className="p-2 border">DOB</th>
+              <th className="p-2 border text-nowrap">License No</th>
+              <th className="p-2 border">Exp</th>
+              <th className="p-2 border">Address1</th>
+              <th className="p-2 border">Address2</th>
               <th className="p-2 border">City</th>
-              <th className="p-2 border">Edit</th>
+              <th className="p-2 border">State</th>
+              <th className="p-2 border">ZipCode</th>
+              <th className="p-2 border">Manage</th>
             </tr>
           </thead>
           <tbody>
             {paginatedDrivers.map((driver) => (
               <tr key={driver.id} className="text-center">
-                <td className="border p-2">{driver.name}</td>
+                <td className="border p-2">{driver.driverFirstName}</td>
+                <td className="border p-2">{driver.driverLastName}</td>
+                <td className="border p-2">{driver.driverEmail}</td>
+                <td className="border p-2">{driver.driverContactNumber}</td>
+                <td className="border p-2">{driver.dob}</td>
                 <td className="border p-2">{driver.licenseNumber}</td>
-                <td className="border p-2">{driver.contactNumber}</td>
+                <td className="border p-2">{driver.experience}</td>
+                <td className="border p-2">{driver.address1}</td>
+                <td className="border p-2">{driver.address2}</td>
                 <td className="border p-2">{driver.city}</td>
-                <td className="border p-2">
-                  <button
-                    onClick={() => handleEdit(driver)}
-                    className="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700"
-                  >
-                    Edit
-                  </button>
+                <td className="border p-2">{driver.state}</td>
+                <td className="border p-2">{driver.zipCode}</td>
+                <td className="border p-2 flex gap-3 justify-center">
+  <Edit onClick={() => handleEdit(driver)} className="w-5 h-12 text-teal-600 cursor-pointer" />
+  <Trash2 onClick={() => handleDelete(driver.id)} className="w-5 h-12 text-red-600 cursor-pointer" />
                 </td>
               </tr>
             ))}
@@ -137,15 +166,28 @@ const DriverTable = () => {
             <h3 className="text-xl font-bold mb-4 text-teal-700">Edit Driver</h3>
 
             <div className="grid grid-cols-2 gap-4">
-              <input name="name" value={selectedDriver.name} onChange={handleChange} className="input" />
-              <input name="licenseNumber" value={selectedDriver.licenseNumber} onChange={handleChange} className="input" />
-              <input name="contactNumber" value={selectedDriver.contactNumber} onChange={handleChange} className="input" />
-              <input type="date" name="joiningDate" value={selectedDriver.joiningDate} onChange={handleChange} className="input" />
-              <input name="city" value={selectedDriver.city} onChange={handleChange} className="input" />
-              <input name="state" value={selectedDriver.state} onChange={handleChange} className="input" />
-              <input name="zipCode" value={selectedDriver.zipCode} onChange={handleChange} className="input" />
-              <input name="address" value={selectedDriver.address} onChange={handleChange} className="input" />
-            </div>
+              
+
+             
+  {Object.keys(fieldPlaceholders).map((field) => (
+    <input
+      key={field}
+      name={field}
+      value={selectedDriver?.[field] || ''}
+      onChange={handleChange}
+      className="input"
+      placeholder={fieldPlaceholders[field]}
+    />
+  ))}
+  <input
+    type="date"
+    name="dob"
+    value={selectedDriver?.dob || ''}
+    onChange={handleChange}
+    className="input"
+  />
+</div>
+
 
             <div className="flex justify-end gap-3 mt-4">
               <button onClick={() => setSelectedDriver(null)} className="px-4 py-2 border rounded">Cancel</button>
@@ -155,7 +197,7 @@ const DriverTable = () => {
         </div>
       )}
 
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer position="top-right" autoClose={1000} />
     </div>
   );
 };

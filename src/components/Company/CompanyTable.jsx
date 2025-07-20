@@ -1,96 +1,99 @@
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Edit, Trash2 } from 'lucide-react';
+import { getCompany, updateCompany, deleteCompany } from '../../service/apiService';
 
-const mockCompanyData = [
-  {
-    id: 1,
-    name: 'ABC Pvt Ltd',
-    website: 'www.abc.com',
-    establishedOn: '2020-01-01',
-    registrationNumber: 'ABC12345',
-    address1: 'Street 1, Block A',
-    address2: 'Street 2, Block A',
-    city: 'Bangalore',
-    state: 'Karnataka',
-    zipCode: '500001',
-    contactFirstName: 'John',
-    contactLastName: 'Cena',
-    contactMail: 'john@gmail.com',
-    contactMobile: '9876543210',
-  },
-  {
-    id: 2,
-    name: 'XYZ Corp',
-    website: 'www.xyz.com',
-    establishedOn: '2019-05-10',
-    registrationNumber: 'XYZ67890',
-    address1: 'Road 5, Sector B',
-    address2: 'Road 2, Sector A',
-    city: 'Bangalore',
-    state: 'Karnataka',
-    zipCode: '506601',
-    contactFirstName: 'David',
-    contactLastName: 'Rithik',
-    contactMail: 'david@gmail.com',
-    contactMobile: '7654321890',
-  },
-];
+
+
+const fieldPlaceholders = {
+  name: 'Company Name',
+  website: 'Website',
+  registrationNumber: 'Registration Number',
+  address1: 'Address Line 1',
+  address2: 'Address Line 2',
+  city: 'City',
+  state: 'State',
+  zipCode: 'Zip Code',
+  contactFirstName: 'Contact First Name',
+  contactLastName: 'Contact Last Name',
+  contactMail: 'Contact Email',
+  contactMobile: 'Contact Mobile',
+};
 
 const CompanyTable = () => {
-  const [companies, setCompanies] = useState([]);
-  const [search, setSearch] = useState('');
+    const [companies, setCompanies] = useState([]);
+   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+  setCurrentPage(1); // reset to page 1 when searching
+}, [search]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 2;
+
+const filtered = companies.filter((c) =>
+  c.name.toLowerCase().includes(search.toLowerCase())
+);
+
+const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
+// Get current page data
+const paginatedCompanies = filtered.slice(
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage
+);
+
+
+ 
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    setCompanies(mockCompanyData); // replace with API call later
+    fetchCompanies();
   }, []);
 
-  const handleEdit = (company) => {
-  setSelectedCompany({ ...company }); // clone to avoid reactivity
-  setIsModalOpen(true); // trigger animation once
-};
-
-  const handleChange = (e) => {
-    setSelectedCompany({ ...selectedCompany, [e.target.name]: e.target.value });
+  const fetchCompanies = async () => {
+    try {
+      const response = await getCompany();
+      setCompanies(response.data.content || []);
+    } catch (err) {
+      console.error('Failed to fetch companies:', err);
+      toast.error('Error fetching company data');
+    }
   };
 
-  const handleUpdate = () => {
-  const updatedList = companies.map((c) =>
-    c.id === selectedCompany.id ? selectedCompany : c
-  );
-  setCompanies(updatedList);
-  toast.success('Company details updated successfully!');
-  setIsModalOpen(false);
-  setSelectedCompany(null);
+  const handleEdit = (company) => {
+    setSelectedCompany({ ...company });
+    setIsModalOpen(true);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSelectedCompany((prev) => ({ ...prev, [name]: value }));
+  };
+
+const handleUpdate = async () => {
+  try {
+    await updateCompany(selectedCompany);
+    toast.success('Company details updated!');
+    await fetchCompanies(); // 🔁 make sure to `await` this
+    setIsModalOpen(false);
+    setSelectedCompany(null);
+  } catch (err) {
+    toast.error('Failed to update company');
+  }
 };
 
 
-  const filtered = companies.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  );
-
- const ModalWithEffect = ({ show, children }) => {
-  const [animate, setAnimate] = useState(false);
-
-  useEffect(() => {
-    if (show) {
-      setAnimate(true);
-    } else {
-      setAnimate(false);
-    }
-  }, [show]);
-
-  return (
-    <div
-      className={`transition-all duration-300 ease-out transform ${
-        animate ? 'scale-100 opacity-100' : 'scale-75 opacity-0'
-      }`}
-    >
-      {children}
-    </div>
-  );
+ const handleDelete = async (id) => {
+  try {
+    await deleteCompany(id);
+    toast.success('Company deleted!');
+    await fetchCompanies(); // 🔁 refresh UI
+  } catch (err) {
+    toast.error('Failed to delete company');
+  }
 };
 
 
@@ -117,16 +120,18 @@ const CompanyTable = () => {
               <th className="p-2 border">Address2</th>
               <th className="p-2 border">City</th>
               <th className="p-2 border">State</th>
-              <th className="p-2 border">Zip Code</th>
-              <th className="p-2 border">First Name</th>
-              <th className="p-2 border">Last Name</th>
-              <th className="p-2 border">Mail ID</th>
+              <th className="p-2 border text-nowrap">Zip Code</th>
+              <th className="p-2 border text-nowrap">First Name</th>
+              <th className="p-2 border text-nowrap">Last Name</th>
+              <th className="p-2 border">Email</th>
               <th className="p-2 border">Mobile</th>
-              <th className="p-2 border">Edit</th>
+              <th className="p-2 border">Manage</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((company) => (
+            {paginatedCompanies.map((company) => (
+
+
               <tr key={company.id} className="text-center">
                 <td className="border p-2">{company.name}</td>
                 <td className="border p-2">{company.website}</td>
@@ -140,13 +145,17 @@ const CompanyTable = () => {
                 <td className="border p-2">{company.contactLastName}</td>
                 <td className="border p-2">{company.contactMail}</td>
                 <td className="border p-2">{company.contactMobile}</td>
-                <td className="border p-2">
-                  <button
-                    onClick={() => handleEdit(company)}
-                    className="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-700"
-                  >
-                    Edit
-                  </button>
+                <td className="border px-2 py-1">
+                  <div className="flex items-center justify-center gap-3">
+                    <Edit
+                      onClick={() => handleEdit(company)}
+                      className="w-5 h-5 text-teal-600 cursor-pointer hover:text-teal-800 transition"
+                    />
+                    <Trash2
+                      onClick={() => handleDelete(company.id)}
+                      className="w-5 h-5 text-red-600 cursor-pointer hover:text-red-800 transition"
+                    />
+                  </div>
                 </td>
               </tr>
             ))}
@@ -154,39 +163,73 @@ const CompanyTable = () => {
         </table>
       </div>
 
-     {isModalOpen && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-    <ModalWithEffect show={isModalOpen}>
-      <div className="bg-white p-6 rounded shadow-lg w-[90%] max-w-xl">
-        <h3 className="text-xl font-bold mb-4 text-teal-700">Edit Company</h3>
+      {/* ✅ Simple Modal - no animation */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-[90%] max-w-xl">
+            <h3 className="text-xl font-bold mb-4 text-teal-700">Edit Company</h3>
 
-        <div className="grid grid-cols-2 gap-4">
-          <input name="name" value={selectedCompany?.name || ''} onChange={handleChange} className="input" />
-          <input name="website" value={selectedCompany?.website || ''} onChange={handleChange} className="input" />
-          <input name="registrationNumber" value={selectedCompany?.registrationNumber || ''} onChange={handleChange} className="input" />
-          <input name="address1" value={selectedCompany?.address1 || ''} onChange={handleChange} className="input" />
-          <input name="address2" value={selectedCompany?.address2 || ''} onChange={handleChange} className="input" />
-          <input name="city" value={selectedCompany?.city || ''} onChange={handleChange} className="input" />
-          <input name="state" value={selectedCompany?.state || ''} onChange={handleChange} className="input" />
-          <input name="zipCode" value={selectedCompany?.zipCode || ''} onChange={handleChange} className="input" />
-          <input name="contactFirstName" value={selectedCompany?.contactFirstName || ''} onChange={handleChange} className="input" />
-          <input name="contactLastName" value={selectedCompany?.contactLastName || ''} onChange={handleChange} className="input" />
-          <input name="contactMail" value={selectedCompany?.contactMail || ''} onChange={handleChange} className="input" />
-          <input name="contactMobile" value={selectedCompany?.contactMobile || ''} onChange={handleChange} className="input" />
-          <input type="date" name="establishedOn" value={selectedCompany?.establishedOn || ''} onChange={handleChange} className="input" />
-        </div>
+            <div className="grid grid-cols-2 gap-4">
+  {Object.keys(fieldPlaceholders).map((field) => (
+    <input
+      key={field}
+      name={field}
+      value={selectedCompany?.[field] || ''}
+      onChange={handleChange}
+      className="input"
+      placeholder={fieldPlaceholders[field]}
+    />
+  ))}
 
-        <div className="flex justify-end gap-3 mt-4">
-          <button onClick={() => { setIsModalOpen(false); setSelectedCompany(null); }} className="px-4 py-2 border rounded">Cancel</button>
-          <button onClick={handleUpdate} className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">Save</button>
+  <input
+    type="date"
+    name="establishedOn"
+    value={selectedCompany?.establishedOn || ''}
+    onChange={handleChange}
+    className="input"
+    placeholder="Established On"
+  />
+</div>
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setSelectedCompany(null);
+                }}
+                className="px-4 py-2 border rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdate}
+                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-    </ModalWithEffect>
+      )}
+
+      <ToastContainer position="top-right" autoClose={1000} />
+      {totalPages > 1 && (
+  <div className="flex justify-center mt-4 gap-2">
+    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      <button
+        key={page}
+        onClick={() => setCurrentPage(page)}
+        className={`px-3 py-1 rounded border ${
+          currentPage === page ? 'bg-teal-600 text-white' : 'bg-white text-gray-700'
+        }`}
+      >
+        {page}
+      </button>
+    ))}
   </div>
 )}
 
 
-<ToastContainer position="top-right" autoClose={1000} />
     </div>
   );
 };
