@@ -1,4 +1,4 @@
-// src/pages/CompanyPage.jsx
+
 import React, { useState } from 'react';
 import CompanyForm from '../components/Company/CompanyForm';
 import CompanyTable from '../components/Company/CompanyTable';

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { saveCompany } from '../../service/apiService'; // Adjust path as needed
-
+import { saveCompany } from '../../service/apiService'; 
 const CompanyForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -24,11 +23,10 @@ const CompanyForm = () => {
    const { name, value } = e.target;
 
   if (name === 'contactMobile') {
-    // Allow only digits
-    if (!/^\d*$/.test(value)) return; // Block non-digit input
+    if (!/^\d*$/.test(value)) return; 
     if (value.length > 10) {
     toast.error('Contact number must be 10 digits only');
-    return; // Block input if over 10 digits
+    return; 
     }
   }
   if(name==='zipCode'){
@@ -53,7 +51,7 @@ const CompanyForm = () => {
     'contactFirstName',
     'contactMobile',
   ];
-  // Check for missing fields
+  
   const missingFields = requiredFields.filter(field => !formData[field]?.trim());
 
   if (missingFields.length > 0) {
@@ -63,7 +61,7 @@ const CompanyForm = () => {
 
     try {
       console.log("formData", formData)
-      const response = await saveCompany(formData); // Call Java backend
+      const response = await saveCompany(formData); 
       if (response.status === 200 && response.data === 'Inserted Successfully') {
         toast.success('' + response.data);
         setFormData({
@@ -107,7 +105,7 @@ const CompanyForm = () => {
       <input name="contactMobile" value={formData.contactMobile} type="text" maxLength={10} onChange={handleChange} placeholder="Contact Mobile *" className="input" />
         <div></div>
 
-  {/* ✅ Submit button placed inside the form, but styled properly */}
+  
   <div className='w-full flex justify-end col-span-1 md:col-span-2'>
     <button
       type="submit"

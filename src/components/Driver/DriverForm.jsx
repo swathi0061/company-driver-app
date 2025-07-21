@@ -22,9 +22,9 @@ const DriverForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // For contact number: only allow digits, max 10 characters
+   
     if (name === 'driverContactNumber') {
-      if (!/^\d*$/.test(value)) return; // Block non-digits
+      if (!/^\d*$/.test(value)) return; 
       if (value.length > 10) {
         toast.error('Contact number must be 10 digits only');
         return;
@@ -50,7 +50,7 @@ const DriverForm = () => {
       'state',
       'zipCode',
     ];
-    // Check for missing fields
+    
     const missingFields = requiredFields.filter(field => !formData[field]?.trim());
   
     if (missingFields.length > 0) {
@@ -59,11 +59,10 @@ const DriverForm = () => {
     }
   
       try {
-        const response = await saveDriver(formData); // Call Java backend
+        const response = await saveDriver(formData); 
         if (response.status === 200 && response.data === 'Inserted Successfully') {
           toast.success('' + response.data);
 
-    // Reset form
     setFormData({
     driverFirstName: '',
     driverLastName: '',

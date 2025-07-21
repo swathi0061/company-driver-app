@@ -54,9 +54,9 @@ const fetchDrivers = async () => {
 
  const handleUpdate = async () => {
   try {
-    await updateDriver(selectedDriver); // call backend
+    await updateDriver(selectedDriver); 
     toast.success('Driver updated!');
-    fetchDrivers(); // reload from backend
+    fetchDrivers(); 
     setSelectedDriver(null);
   } catch (err) {
     toast.error('Failed to update driver');
@@ -65,9 +65,9 @@ const fetchDrivers = async () => {
 
 const handleDelete = async (id) => {
   try {
-    await deleteDriver(id); // call backend
+    await deleteDriver(id); 
     toast.success('Driver deleted!');
-    fetchDrivers(); // reload after deletion
+    fetchDrivers(); 
   } catch (err) {
     toast.error('Failed to delete driver');
   }
@@ -91,7 +91,7 @@ const handleDelete = async (id) => {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            setCurrentPage(1); // reset to page 1 on search
+            setCurrentPage(1); 
           }}
           className="input w-full max-w-md"
         />

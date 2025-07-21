@@ -26,7 +26,7 @@ const CompanyTable = () => {
    const [search, setSearch] = useState('');
 
   useEffect(() => {
-  setCurrentPage(1); // reset to page 1 when searching
+  setCurrentPage(1); 
 }, [search]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,7 +77,7 @@ const handleUpdate = async () => {
   try {
     await updateCompany(selectedCompany);
     toast.success('Company details updated!');
-    await fetchCompanies(); // 🔁 make sure to `await` this
+    await fetchCompanies(); 
     setIsModalOpen(false);
     setSelectedCompany(null);
   } catch (err) {
@@ -90,7 +90,7 @@ const handleUpdate = async () => {
   try {
     await deleteCompany(id);
     toast.success('Company deleted!');
-    await fetchCompanies(); // 🔁 refresh UI
+    await fetchCompanies(); 
   } catch (err) {
     toast.error('Failed to delete company');
   }
@@ -163,7 +163,7 @@ const handleUpdate = async () => {
         </table>
       </div>
 
-      {/* ✅ Simple Modal - no animation */}
+     
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white p-6 rounded shadow-lg w-[90%] max-w-xl">
